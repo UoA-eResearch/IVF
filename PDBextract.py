@@ -42,4 +42,4 @@ for well in tqdm(df.Well.unique()):
             last_time = row.time_since_fert_minutes
             filename = f"M{machine}_S{slide}_W{well}_F{args.focal}_{round(row.time_since_fert_minutes)}.jpg"
             filename = os.path.join(args.output_dir, filename)
-            Image.open(io.BytesIO(row.Image)).save(filename)
+            Image.open(io.BytesIO(row.Image)).save(filename,quality=100, subsampling=-1)
