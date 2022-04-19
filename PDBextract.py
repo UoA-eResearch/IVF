@@ -21,6 +21,9 @@ filename = os.path.basename(args.input_file)
 match = re.search(r'S(\d+)_I(\d+)', filename)
 slide, machine = match.groups()
 
+output_dir = os.path.join(args.output_dir, f"M{machine}_S{slide}")
+os.makedirs(output_dir, exist_ok=True)
+
 con = sqlite3.connect(args.input_file)
 
 cur = con.cursor()
@@ -41,5 +44,5 @@ for well in tqdm(df.Well.unique()):
         if dt > args.min_interval:
             last_time = row.time_since_fert_minutes
             filename = f"M{machine}_S{slide}_W{well}_F{args.focal}_{round(row.time_since_fert_minutes)}.jpg"
-            filename = os.path.join(args.output_dir, filename)
+            filename = os.path.join(output_dir, filename)
             Image.open(io.BytesIO(row.Image)).save(filename,quality=100, subsampling=-1)
