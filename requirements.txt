@@ -1,3 +1,8 @@
 pandas
 tqdm
 Pillow
+numpy
+tensorflow
+scikit-learn
+matplotlib
+jupyter
