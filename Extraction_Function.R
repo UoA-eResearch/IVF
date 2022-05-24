@@ -2,12 +2,12 @@
 
 library(tidyverse)
 library(RSQLite)
-setwd("/mnt/embryo/scripts")
+
 # Read in list of files
 files.in<-read_csv("PDB_database_summary.csv")
 
 
-first=F
+first=T
 if(first) {
 # Save list down as SQLite DB
 con <- dbConnect(RSQLite::SQLite(), "PDBdatabase.db")
@@ -26,9 +26,9 @@ con <- dbConnect(RSQLite::SQLite(), "PDBdatabase.db")
 sql.code<-paste0("SELECT DISTINCT Location FROM LocalPDB WHERE Slide IN (",paste0(who,collapse=','),")")
 
 out<-dbGetQuery(con,sql.code)
-
+setwd("/mnt/embryo/scripts")
 for (i in 1:nrow(out)){
-        py.call <- paste0("python3 PDBextract.py -i ",out$Location[i]," -f 0 -o /data/test -m 20")
+        py.call <- paste0("python3 PDBextract.py -i ",out$Location[i]," -f 0 -o /fastdata/test -m 20")
         print(paste0(round(i/nrow(out)*100,2)," ",py.call))
         system(py.call)
 }
