@@ -2,12 +2,13 @@
 
 library(tidyverse)
 library(RSQLite)
+library("lubridate")
 
 # Read in list of files
 files.in<-read_csv("PDB_database_summary.csv")
 
 
-first=T
+first=F
 if(first) {
 # Save list down as SQLite DB
 con <- dbConnect(RSQLite::SQLite(), "PDBdatabase.db")
@@ -20,6 +21,8 @@ slide.list<-unique(files.in$Slide)
 
 set.seed(55845)
 who<-sample(slide.list,10)
+
+write.csv(who,file=paste0( "./slides/" ,today()," samples selected.csv"),row.names=F)
 
 con <- dbConnect(RSQLite::SQLite(), "PDBdatabase.db")
 
