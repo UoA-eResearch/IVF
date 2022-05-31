@@ -15,7 +15,7 @@ parser.add_argument('-input_file', '-i', help='Input file', required=True)
 parser.add_argument('-focal', '-f', help='Focal plane', type=int, default=0, choices=range(-45, 46, 15))
 parser.add_argument('-output_dir', '-o', help='Output directory', default="./")
 parser.add_argument('-min_interval', '-m', help='Only extract images that are at least this far apart, in minutes', type=int, default=60)
-parser.add_argument('-focal_shift', '-s', help='If passed, will put focal shifted images +15 in the red channel and -15 in the blue channel', action="store_true")
+parser.add_argument('-focal_shift', '-s', help='If passed, will put focal shifted images -15 in the red channel and +15 in the blue channel', action="store_true")
 args = parser.parse_args()
 
 filename = os.path.basename(args.input_file)
