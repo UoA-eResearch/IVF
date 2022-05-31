@@ -68,7 +68,7 @@ os.makedirs(args.output_dir, exist_ok=True)
 
 classes_to_export = args.classes.split(",")
 
-for i, row in tqdm(df.iterrows()):
+for i, row in tqdm(df.iterrows(), total=len(df)):
   if row["class"] in classes_to_export:
     if row["confidence"] > args.threshold:
       folder = os.path.join(args.output_dir, row["class"])
