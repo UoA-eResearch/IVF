@@ -137,3 +137,5 @@ models
 nohup.out
 
 .Rproj.user
+mlruns
+*.npy
