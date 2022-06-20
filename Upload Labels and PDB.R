@@ -156,6 +156,13 @@ update.image.labels<-function(file.in,label.in){
         dbWriteTable(con,"image",compiled.data.for.table,overwrite=T,
                      field.types=field.types,
                      row.names=F)
+        dbExecute(con,"  ALTER TABLE image
+                           ADD CONSTRAINT FK_PDBid
+                           FOREIGN KEY (PDBid) REFERENCES PDB(PDBid)
+                           on delete set null
+                           on update set null;")
+        dbExecute(con," CREATE INDEX idx_image ON image (image)")
+        dbExecute(con, "ALTER TABLE image ADD PRIMARY KEY (image_id);")
         dbDisconnect(con)
 }
 
