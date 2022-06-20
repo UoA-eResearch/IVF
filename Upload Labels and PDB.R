@@ -36,6 +36,8 @@ if(pdb.up==T) {
         )
 }
 
+# sometime duplicated images appear and need to read out data remove duplicates and resend.
+
 file.in<-"./labels/Labels-2022-06-20-Nick-Train.csv"
 
 update.image.labels<-function(file.in,label.in){
@@ -51,6 +53,7 @@ update.image.labels<-function(file.in,label.in){
         # Read in data
         pdb.read<-dbReadTable(con,"PDB")
         images.read<-dbReadTable(con,"image")
+        images.read<-images.read[!duplicated(images.read$image),]
         
         # Read in file provided
         tmp.data<-read_csv(file.in,col_types = cols())
@@ -61,6 +64,8 @@ update.image.labels<-function(file.in,label.in){
         
         machine<-sapply(img.file,"[[",1)
         slide<-sapply(img.file,"[[",2)
+        well<-sapply(img.file,"[[",3)
+        
         time<-sapply(img.file,"[[",5)
         time<-gsub('.{4}$', '', time)
         time<-as.integer(time)
@@ -68,18 +73,18 @@ update.image.labels<-function(file.in,label.in){
         # Clean up for matching 
         machine<-as.numeric(gsub("M","",machine))
         slide<-as.numeric(gsub("S","", slide))
+        well<-as.numeric(gsub("W","",well))
         
-        
-        tmp<-paste0(pdb.read$Machine,"_",pdb.read$Slide)
+        tmp<-paste0(pdb.read$Machine,"_",pdb.read$Slide,"_",pdb.read$Well)
         
         pdb.read$combloc<-tmp
         
-        img.ms<-paste0(machine,"_",slide)
+        img.ms<-paste0(machine,"_",slide,"_",well)
         
         loc<-match(img.ms,tmp)
         
-        linked.for.update<-cbind(tmp.data,pdb.read[loc,"pdb"],time)
-        colnames(linked.for.update)<-c("class", "file", "labeler","pdb","time")
+        linked.for.update<-cbind(tmp.data,pdb.read[loc,"PDBid"],time)
+        colnames(linked.for.update)<-c("class", "file", "labeler","PDBid","time")
         
         # Split data into matched and unmatched for update
         
@@ -97,9 +102,11 @@ update.image.labels<-function(file.in,label.in){
         
                 
                 b<-linked.for.update[images.match,] %>% # Update column where they match
-                        arrange(file)
+                        arrange(file) %>%
+                        distinct()
                 c<-images.read[file.match,] %>% 
-                        arrange(image)
+                        arrange(image) %>%
+                        distinct()
                 
                 c[label.in]<-b$class
          
@@ -113,12 +120,13 @@ update.image.labels<-function(file.in,label.in){
         
         if(nrow(unmatched.data) != 0){
                 
-                unmatched.data<-cbind(1,linked.for.update$pdb[unmatched.loc],linked.for.update$file[unmatched.loc],NA,NA,NA,NA,linked.for.update$time[unmatched.loc])
-                colnames(unmatched.data)<-c("image_id","pdb","image","Label_D1","Label_N2","Label_S2","Model2","time")
+                unmatched.data<-cbind(1,linked.for.update$PDBid[unmatched.loc],linked.for.update$file[unmatched.loc],"NA","NA","NA","NA",linked.for.update$time[unmatched.loc])
+                colnames(unmatched.data)<-c("image_id","PDBid","image","Label_D1","Label_N2","Label_S2","Model2","time")
                 unmatched.data[,label.in]<-linked.for.update$class[unmatched.loc]
                 unmatched.data<-as.data.frame(unmatched.data)
                 unmatched.data$image_id<-as.integer(unmatched.data$image_id)
                 unmatched.data$time<-as.integer(unmatched.data$time)
+                unmatched.data$PDBid<-as.integer(unmatched.data$PDBid)
                 
         }
         
@@ -131,26 +139,27 @@ update.image.labels<-function(file.in,label.in){
                         mutate(image_id=row_number())    
         }
         
-        # Old code to make first run work
-        # linked.for.update<-cbind(tmp.data,pdb.read[loc,"pdb"],time) %>%
-        #         mutate(id=row_number())
-        # colnames(linked.for.update)<-c("class", "file", "labeler","pdb","time","id")
-        # 
-        # update.data<-cbind(linked.for.update$id,linked.for.update$pdb,linked.for.update$file,NA,NA,NA,linked.for.update$class,linked.for.update$time)
-        # colnames(update.data)<-c("image_id","pdb","image","Label_D1","Label_N2","Label_S2","Model2","time")
-        # 
-        # update.data<-as.data.frame(update.data)
-        # 
-        # dbWriteTable(con,"image",out,overwrite=T)
-        #return(compiled.data.for.table)
         rows.added<-nrow(compiled.data.for.table)-nrow(images.read)
         
+        field.types = c(
+                image_id = "int unsigned",
+                image = "varchar(255)",
+                Label_D1 = "varchar(255)",
+                Label_N2 = "varchar(255)",
+                Label_S2 = "varchar(255)",
+                Model2 = "varchar(255)",
+                time = "int",
+                PDBid = "int unsigned"
+        )
+        
         print(paste0("Added ",rows.added, " images"))
-        dbWriteTable(con,"image",compiled.data.for.table,overwrite=T)
+        dbWriteTable(con,"image",compiled.data.for.table,overwrite=T,
+                     field.types=field.types,
+                     row.names=F)
         dbDisconnect(con)
 }
 
-
+cc<-update.image.labels("./labels/Labels-2022-06-20-Nick-Train.csv","Model2")
 dd<-update.image.labels("./labels/Labels-2022-06-20-Dorothy.csv","Label_D1")
 ee<-update.image.labels("./labels/Labels-2022-06-20-Suyeon.csv","Label_S2")
 ff<-update.image.labels("./labels/Labels-2022-06-20-Nick.csv","Label_N2")
