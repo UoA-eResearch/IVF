@@ -11,7 +11,7 @@ b<-strsplit(a,"/",fixed=T)
 class<-sapply(b,"[[",1)
 file<-sapply(b,"[[",2)
 
-loc<-grep("_S",class)
+loc<-grep("\\d_S",class)
 # Remove Classes that have sample id in name as they are not labels
 if(length(loc) != 0) {
         class<-class[-loc]
@@ -32,9 +32,10 @@ write_csv(file=paste0("./labels/Labels-",Sys.Date(),"-",labeler,".csv"),collecte
 }
 
 # Test
-# ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/Four","Nick")
+ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/Four","Nick")
 ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/One","Helen")
-ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/Dorothy","Dorothy")
 ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/Dorothy","Dorothy")
 ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/SuYeon","Suyeon")
 ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/train","Nick-Train")
+
+

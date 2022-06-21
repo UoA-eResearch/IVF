@@ -11,6 +11,7 @@ con <- dbConnect(RMariaDB::MariaDB(), group = "IVF",
                  db = "IVF")
 dbListTables(con)
 pdb.up=F
+dbDisconnect(con)
 if(pdb.up==T) {
         # read in pdb data
         dat.in <- read_csv(file = "PDB_database_summary.csv")
@@ -38,7 +39,7 @@ if(pdb.up==T) {
 
 # sometime duplicated images appear and need to read out data remove duplicates and resend.
 
-file.in<-"./labels/Labels-2022-06-20-Nick-Train.csv"
+#file.in<-"./labels/Labels-2022-06-20-Nick-Train.csv"
 
 update.image.labels<-function(file.in,label.in){
 
@@ -132,7 +133,9 @@ update.image.labels<-function(file.in,label.in){
         
         if(nrow(unmatched.data != 0)) {
         
-        compiled.data.for.table<-bind_rows(images.read,unmatched.data) %>%
+        compiled.data.for.table<-bind_rows(images.read,unmatched.data) 
+        
+        compiled.data.for.table<-compiled.data.for.table[!duplicated(compiled.data.for.table$image),] %>%
                 mutate(image_id=row_number()) 
         } else {
                 compiled.data.for.table<-images.read %>%
@@ -140,6 +143,7 @@ update.image.labels<-function(file.in,label.in){
         }
         
         rows.added<-nrow(compiled.data.for.table)-nrow(images.read)
+        samples.updated<-sum(file.match.reverse)
         
         field.types = c(
                 image_id = "int unsigned",
@@ -152,7 +156,7 @@ update.image.labels<-function(file.in,label.in){
                 PDBid = "int unsigned"
         )
         
-        print(paste0("Added ",rows.added, " images"))
+        print(paste0("Added ",rows.added, " images and updated ",samples.updated," images."))
         dbWriteTable(con,"image",compiled.data.for.table,overwrite=T,
                      field.types=field.types,
                      row.names=F)
@@ -166,7 +170,8 @@ update.image.labels<-function(file.in,label.in){
         dbDisconnect(con)
 }
 
-cc<-update.image.labels("./labels/Labels-2022-06-20-Nick-Train.csv","Model2")
-dd<-update.image.labels("./labels/Labels-2022-06-20-Dorothy.csv","Label_D1")
-ee<-update.image.labels("./labels/Labels-2022-06-20-Suyeon.csv","Label_S2")
-ff<-update.image.labels("./labels/Labels-2022-06-20-Nick.csv","Label_N2")
+cc<-update.image.labels("./labels/Labels-2022-06-21-Nick-Train.csv","Label_N2")
+dd<-update.image.labels("./labels/Labels-2022-06-21-Dorothy.csv","Label_D1")
+ee<-update.image.labels("./labels/Labels-2022-06-21-Suyeon.csv","Label_S2")
+ef<-update.image.labels("./labels/Labels-2022-06-21-Helen.csv","Label_N2")
+ff<-update.image.labels("./labels/Labels-2022-06-21-Nick.csv","Label_N2")
