@@ -140,3 +140,5 @@ nohup.out
 mlruns
 *.npy
 mlflow.db
+
+.Rhistory
