@@ -5,6 +5,7 @@ library(tidyverse)
 library(lubridate)
 library(data.table)
 library(randomForest)
+library(naivebayes)
 
 
 con <- dbConnect(RMariaDB::MariaDB(), group = "IVF",
@@ -19,6 +20,20 @@ images.read<-dbReadTable(con,"image")
 model.fit<-randomForest(images.read[,c(2,8)],as.factor(images.read$Model2))
 model.fit
 varImpPlot(model.fit)
+
+bayes.data<-images.read %>%
+        filter(Model2 != "NA") %>%
+        filter(Model2 != "Empty")
+
+bayes.data$Model<-as.factor(bayes.data$Model2) %>% droplevels()
+model.bayes<-naive_bayes(Model~time,usekernel = T,data=bayes.data)
+plot(model.bayes)
+
+predict<-predict(model.bayes,bayes.data)
+tableone<-table(predict,bayes.data$Model)
+tableone
+acc<-1-sum(diag(tableone)) / sum(tableone)
+acc
 
 model.fit2<-glm(as.factor(images.read$Model2)~images.read$time,family=binomial)
 
@@ -84,3 +99,28 @@ test<-tmp %>%
 boxplot(images.read$time~ test)
  
 images.read$Model2<-test
+
+
+field.types = c(
+        image_id = "int unsigned",
+        image = "varchar(255)",
+        Label_D1 = "varchar(255)",
+        Label_N2 = "varchar(255)",
+        Label_S2 = "varchar(255)",
+        Model2 = "varchar(255)",
+        time = "int",
+        PDBid = "int unsigned"
+)
+
+dbWriteTable(con,"image",images.read,overwrite=T,
+             field.types=field.types,
+             row.names=F)
+dbExecute(con,"  ALTER TABLE image
+                           ADD CONSTRAINT FK_PDBid
+                           FOREIGN KEY (PDBid) REFERENCES PDB(PDBid)
+                           on delete set null
+                           on update set null;")
+dbExecute(con," CREATE INDEX idx_image ON image (image)")
+dbExecute(con, "ALTER TABLE image ADD PRIMARY KEY (image_id);")
+
+write_csv(file="Model 2 labels.csv",images.read)
