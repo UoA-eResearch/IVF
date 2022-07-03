@@ -6,6 +6,9 @@ library(lubridate)
 library(data.table)
 library(randomForest)
 library(naivebayes)
+library(ggforce)
+library(ggdist)
+library(gghalves)
 
 
 con <- dbConnect(RMariaDB::MariaDB(), group = "IVF",
@@ -15,6 +18,9 @@ con <- dbConnect(RMariaDB::MariaDB(), group = "IVF",
 dbListTables(con)
 
 images.read<-dbReadTable(con,"image")
+
+images.read <- images.read %>%
+        filter(PDBid != 22295) # Bad label by me. Not sure how this got in. Bad copy?
 
 
 model.fit<-randomForest(images.read[,c(2,8)],as.factor(images.read$Model2))
@@ -98,6 +104,17 @@ test<-tmp %>%
 
 boxplot(images.read$time~ test)
  
+g<- images.read %>%
+        mutate(Cats=factor(Model2, levels=c("Syngamy","2pn","2 Cell", "3 Cell", "4 Cell", "5 Cell", "6-7 Cell", "8 Cell", "9+ Cell", "Compacting", "Blast", "Empty","NA"),ordered=T)) %>%
+        filter(Cats != "NA") %>%
+        droplevels()
+
+g2<- ggplot(aes(y=time,x=Cats,fill=Model2),data=g) + 
+        ggdist::stat_halfeye(adjust = .5, width = .3, .width = 0, justification = -.3, point_colour = NA) + 
+        geom_boxplot(width = .1, outlier.shape = NA)
+        
+g2
+
 images.read$Model2<-test
 
 
@@ -124,3 +141,5 @@ dbExecute(con," CREATE INDEX idx_image ON image (image)")
 dbExecute(con, "ALTER TABLE image ADD PRIMARY KEY (image_id);")
 
 write_csv(file="Model 2 labels.csv",images.read)
+
+
