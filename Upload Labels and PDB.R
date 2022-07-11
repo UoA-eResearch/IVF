@@ -177,4 +177,9 @@ ef<-update.image.labels("./labels/Labels-2022-06-21-Helen.csv","Label_N2")
 ff<-update.image.labels("./labels/Labels-2022-06-21-Nick.csv","Label_N2")
 update.image.labels("./labels/Labels-2022-06-22-Nick.csv","Label_N2")
 
-update.image.labels("./labels/Labels-2022-06-28-Dorothy.csv","Label_D1")
+update.image.labels("./labels/Labels-2022-07-04-Suyeon.csv","Label_S2")
+update.image.labels("./labels/Labels-2022-07-04-Nick.csv","Label_N2")
+update.image.labels("./labels/Labels-2022-07-04-Dorothy.csv","Label_D1")
+
+update.image.labels("./labels/Labels-2022-07-11-Suyeon.csv","Label_S2")
+update.image.labels("./labels/Labels-2022-07-11-Dorothy.csv","Label_D1")
