@@ -183,3 +183,6 @@ update.image.labels("./labels/Labels-2022-07-04-Dorothy.csv","Label_D1")
 
 update.image.labels("./labels/Labels-2022-07-11-Suyeon.csv","Label_S2")
 update.image.labels("./labels/Labels-2022-07-11-Dorothy.csv","Label_D1")
+
+update.image.labels("./labels/Labels-2022-07-18-Suyeon.csv","Label_S2")
+update.image.labels("./labels/Labels-2022-07-18-Dorothy.csv","Label_D1")

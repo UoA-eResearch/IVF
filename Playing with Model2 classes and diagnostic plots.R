@@ -16,7 +16,7 @@ con <- dbConnect(RMariaDB::MariaDB(), group = "IVF",
                  password = "embryo",
                  db = "IVF")
 dbListTables(con)
-
+# pdb.in<-dbReadTable(con,"PDB")
 images.read<-dbReadTable(con,"image")
 
 images.read <- images.read %>%

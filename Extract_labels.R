@@ -49,6 +49,5 @@ ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/SuYeon","Suyeon")
 ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/train","Nick-Train")
 
 ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/Dorothy","Dorothy",delete=T)
-ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/Four","Nick",delete=T)
 ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/SuYeon","Suyeon",delete=T)
-
+ExtractLabels("/home/nick/dbox/EmbryoLabeling/Labelers/Four","Nick",delete=T)
